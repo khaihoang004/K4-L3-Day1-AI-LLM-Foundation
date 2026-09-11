@@ -74,7 +74,7 @@ def call_openai(
 
     from openai import OpenAI
  
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(base_url=os.getenv("OPENAI_BASE_URL"), api_key=os.getenv("OPENAI_API_KEY"))
     start = time.perf_counter()
     response = client.chat.completions.create(
         model=model,
@@ -180,8 +180,9 @@ def chat_with_system_prompt(
     """
     # TODO: giống call_openai nhưng messages có thêm phần tử role="system"
     from openai import OpenAI
- 
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    client = OpenAI(base_url=os.getenv("OPENAI_BASE_URL"), api_key=os.getenv("OPENAI_API_KEY"))
+
     start = time.perf_counter()
     messages = [
         {"role": "system", "content": system_prompt},
@@ -307,7 +308,8 @@ def streaming_chatbot() -> None:
     # TODO: vòng lặp while, đọc input, stream phản hồi, duy trì history
     from openai import OpenAI
  
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(base_url=os.getenv("OPENAI_BASE_URL"), api_key=os.getenv("OPENAI_API_KEY"))
+
     history = []
     while True:
         user_msg = input("Input: ")
@@ -425,7 +427,8 @@ def run_assistant(
         get_input = input
     from openai import OpenAI
  
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(base_url=os.getenv("OPENAI_BASE_URL"), api_key=os.getenv("OPENAI_API_KEY"))
+
     history, num_turns, total_tokens, total_cost = [], 0, 0, 0.0
     while True:
         if max_turns is not None and num_turns >= max_turns:
@@ -528,6 +531,7 @@ def format_comparison_table(results: list[dict]) -> str:
 # Entry point — demo chạy thật (cần OPENAI_API_KEY)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+
     print("=== So sánh model ===")
     result = compare_models(
         "Giải thích khác biệt giữa temperature và top_p trong một câu."
