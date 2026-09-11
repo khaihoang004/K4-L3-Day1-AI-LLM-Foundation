@@ -468,8 +468,14 @@ def batch_compare(prompts: list[str]) -> list[dict]:
         List các dict — mỗi dict là kết quả compare_models kèm thêm
         key "prompt" chứa prompt gốc.
     """
-    # TODO (bonus): lặp qua prompts, gọi compare_models, thêm key "prompt"
-    raise NotImplementedError("Implement batch_compare")
+    final_output = []
+
+    for p in prompts:
+        out = compare_models(p)
+        out.update({"prompt": p})
+        final_output.append(out)
+
+    return final_output
 
 
 def format_comparison_table(results: list[dict]) -> str:
@@ -480,8 +486,43 @@ def format_comparison_table(results: list[dict]) -> str:
     Gợi ý: cắt text dài còn 40 ký tự cho dễ nhìn.
     """
     # TODO (bonus): dựng chuỗi bảng và trả về
-    raise NotImplementedError("Implement format_comparison_table")
 
+    if not results:
+        return "Không có dữ liệu để hiển thị."
+
+    def truncate(text: str, max_len: int = 40) -> str:
+        if text is None:
+            return ""
+        text = str(text).replace("\n", " ")
+        return text if len(text) <= max_len else text[:max_len-3] + "..."
+
+    headers = ["Prompt", "GPT-4o Response", "Mini Response", "GPT-4o Latency", "Mini Latency"]
+    
+    rows = []
+    for r in results:
+        prompt = truncate(r.get("prompt", ""))
+        gpt4o_resp = truncate(r.get("gpt4o_response", ""))
+        mini_resp = truncate(r.get("mini_response", ""))
+        
+        gpt4o_lat = f"{r.get('gpt4o_latency', 0)}s" if isinstance(r.get('gpt4o_latency'), (int, float)) else str(r.get('gpt4o_latency', ""))
+        mini_lat = f"{r.get('mini_latency', 0)}s" if isinstance(r.get('mini_latency'), (int, float)) else str(r.get('mini_latency', ""))
+        
+        rows.append([prompt, gpt4o_resp, mini_resp, gpt4o_lat, mini_lat])
+
+    col_widths = [len(h) for h in headers]
+    for row in rows:
+        for i, cell in enumerate(row):
+            col_widths[i] = max(col_widths[i], len(cell))
+
+    header_str = " | ".join(h.ljust(w) for h, w in zip(headers, col_widths))
+    separator_str = "-+-".join("-" * w for w in col_widths)
+    
+    table_lines = [header_str, separator_str]
+    for row in rows:
+        row_str = " | ".join(cell.ljust(w) for cell, w in zip(row, col_widths))
+        table_lines.append(row_str)
+
+    return "\n".join(table_lines)
 
 # ---------------------------------------------------------------------------
 # Entry point — demo chạy thật (cần OPENAI_API_KEY)
